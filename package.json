@@ -88,10 +88,11 @@
       }
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "release": "npm run release:prep && release-it",
-    "release:prep": "npm run clean && npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
-    "get:version": "node --eval 'console.log(require(`./package.json`).version)'",
+    "prepack": "npm run build",
     "clean": "rimraf dist build coverage tsBuildInfo.json isolate*.log flamegraph.html out.pdf",
     "typecheck": "tsc --noEmit --incremental false --tsBuildInfoFile null",
     "build": "tsdown",
@@ -102,7 +103,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt .",
-    "format:check": "oxfmt --check ."
+    "format:check": "oxfmt --check .",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test"
   },
   "dependencies": {
     "@pdf-lib/standard-fonts": "^1.0.0",
@@ -121,7 +123,6 @@
     "@types/pako": "^2.0.4",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
-    "release-it": "^17.0.3",
     "rimraf": "^5.0.5",
     "tsdown": "^0.22.14",
     "typescript": "^5.9.3",
