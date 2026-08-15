@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, watch } from 'vue';
+import { nextTick, onMounted, ref, shallowRef, watch } from 'vue';
 
 import { demos } from '../demos';
 
@@ -122,6 +122,7 @@ const run = async () => {
 
     await render(bytes);
     status.value = '';
+    await mountCanvases();
   } catch (e: any) {
     canvases.value = [];
     error.value = e?.message ?? String(e);
@@ -130,13 +131,16 @@ const run = async () => {
   }
 };
 
-const mountCanvases = (el: HTMLElement | null) => {
-  if (!el) return;
-  el.replaceChildren(...canvases.value);
+const output = ref<HTMLElement | null>(null);
+
+// The canvases are created imperatively by pdf.js, so they are attached to the
+// container by hand once it is in the DOM.
+const mountCanvases = async () => {
+  await nextTick();
+  output.value?.replaceChildren(...canvases.value);
 };
 
-const output = ref<HTMLElement | null>(null);
-watch(canvases, () => mountCanvases(output.value));
+watch(canvases, mountCanvases);
 
 onMounted(run);
 watch(
@@ -175,7 +179,7 @@ watch(
     <div class="pdf-demo__preview" :style="{ maxHeight: height ?? '460px' }">
       <pre v-if="error" class="pdf-demo__error">{{ error }}</pre>
       <p v-else-if="status" class="pdf-demo__status">{{ status }}</p>
-      <div v-else ref="output" class="pdf-demo__pages" />
+      <div v-show="!error && !status" ref="output" class="pdf-demo__pages" />
     </div>
   </div>
 </template>
