@@ -106,7 +106,6 @@ fs.writeFileSync('out.pdf', await pdfDoc.save());
 - [Contributing](#contributing)
 - [Tutorials and Cool Stuff](#tutorials-and-cool-stuff)
 - [Prior Art](#prior-art)
-- [Changelog](CHANGELOG.md)
 - [License](#license)
 
 ## Features
