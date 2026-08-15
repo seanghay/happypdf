@@ -38,6 +38,9 @@ Concretely:
 - **Correct complex-script output.** Glyph reordering, ligatures and mark positioning survive into
   the PDF.
 - **Variable font support.** Pass `variations` to `embedFont` to instance a variable font.
+- **Wrapping and alignment.** `maxWidth` wraps and `align` supports left, center,
+  right and justify, with word boundaries from `Intl.Segmenter` so spaceless
+  scripts wrap correctly.
 - **Same API otherwise.** Everything else from `pdf-lib` / `@cantoo/pdf-lib` — forms, SVG, PDF/A,
   encryption — works unchanged.
 
@@ -92,6 +95,7 @@ fs.writeFileSync('out.pdf', await pdfDoc.save());
   - [NPM Module](#npm-module)
   - [Pinning `pako` to v2](#pinning-pako-to-v2)
   - [UMD Module](#umd-module)
+  - [Text Wrapping and Alignment](#text-wrapping-and-alignment)
   - [Font Shaping (HarfBuzz)](#font-shaping-harfbuzz)
 - [Documentation](#documentation)
 - [Fonts and Unicode](#fonts-and-unicode)
@@ -1728,6 +1732,66 @@ import { PDFDocument, rgb } from 'happypdf';
 // UMD module
 var PDFDocument = happypdf.PDFDocument;
 var rgb = happypdf.rgb;
+```
+
+## Text Wrapping and Alignment
+
+Pass a `maxWidth` to wrap, and `align` to choose how the wrapped lines sit
+within that width — `left` (default), `center`, `right` or `justify`.
+
+```js
+page.drawText(paragraph, {
+  x: 40,
+  y: 700,
+  size: 11,
+  maxWidth: 360,
+  lineHeight: 15,
+  align: 'justify',
+});
+```
+
+`justify` stretches every line except the last one of each paragraph, spreading
+the slack across that line's break opportunities — the same convention as CSS
+`text-align: justify`.
+
+### Word boundaries
+
+Break points come from `Intl.Segmenter`, so wrapping and justification work in
+scripts that do not separate words with spaces — Khmer, Thai, Lao, Japanese —
+rather than only at spaces:
+
+```js
+page.drawText('សួស្តីពិភពលោក សូមស្វាគមន៍មកកាន់ប្រទេសកម្ពុជា', {
+  font: khmerFont,
+  maxWidth: 360,
+  align: 'justify',
+});
+```
+
+Set `locale` to pick a specific segmentation locale; it defaults to the
+runtime's.
+
+### Long words
+
+A word wider than `maxWidth` is broken between graphemes so it still fits, which
+keeps combining marks attached to their base character. Use
+`wordBreak: 'keep-all'` to let it overflow instead.
+
+Soft hyphens (`\u00AD`) act as optional break points and are never rendered.
+
+### Laying out text yourself
+
+`wrapText` is exported if you want the line boxes without drawing them — for
+measuring a block, paginating, or rendering somewhere else:
+
+```js
+import { wrapText } from 'happypdf';
+
+const lines = wrapText(paragraph, (t) => font.widthOfTextAtSize(t, 11), {
+  maxWidth: 360,
+  align: 'justify',
+});
+// [{ text, runs: [{ text, x }], width, isParagraphEnd }, ...]
 ```
 
 ## Font Shaping (HarfBuzz)

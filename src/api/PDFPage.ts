@@ -2,7 +2,8 @@ import { Color, rgb } from './colors';
 import {
   drawImage,
   drawLine,
-  drawLinesOfText,
+  drawAlignedLinesOfText,
+  EncodedTextLine,
   drawPage,
   drawRectangle,
   drawSvgPath,
@@ -42,7 +43,6 @@ import { degrees, Rotation, toDegrees } from './rotations';
 import { StandardFonts } from './StandardFonts';
 import {
   PDFContentStream,
-  PDFHexString,
   PDFName,
   PDFOperator,
   PDFPageLeaf,
@@ -55,14 +55,12 @@ import {
   assertIs,
   assertMultiple,
   assertOrUndefined,
-  breakTextIntoLines,
-  cleanText,
   rectanglesAreEqual,
-  lineSplit,
   assertRangeOrUndefined,
   assertIsOneOfOrUndefined,
 } from '../utils';
 import { drawSvg } from './svg';
+import { wrapText } from './text/wrap';
 import { extractPageContents } from './extraction/extractPageContents';
 import { PdfAsset } from './extraction/types';
 
@@ -1017,6 +1015,22 @@ export default class PDFPage {
    *   },
    * )
    * ```
+   *
+   * Passing a `maxWidth` wraps the text, and `align` controls how the wrapped
+   * lines sit within that width:
+   * ```js
+   * page.drawText(paragraph, {
+   *   x: 25,
+   *   y: 700,
+   *   maxWidth: 400,
+   *   lineHeight: 16,
+   *   align: 'justify',
+   * })
+   * ```
+   * Word boundaries come from `Intl.Segmenter`, so text in scripts that do not
+   * separate words with spaces — Khmer, Thai, Lao, Japanese — wraps and
+   * justifies at real word boundaries.
+   *
    * @param text The text to be drawn.
    * @param options The options to be used when drawing the text.
    */
@@ -1033,7 +1047,20 @@ export default class PDFPage {
     assertOrUndefined(options.y, 'options.y', ['number']);
     assertOrUndefined(options.lineHeight, 'options.lineHeight', ['number']);
     assertOrUndefined(options.maxWidth, 'options.maxWidth', ['number']);
-    assertOrUndefined(options.wordBreaks, 'options.wordBreaks', [Array]);
+    assertIsOneOfOrUndefined(options.align, 'options.align', [
+      'left',
+      'center',
+      'right',
+      'justify',
+    ]);
+    assertIsOneOfOrUndefined(options.wordBreak, 'options.wordBreak', [
+      'normal',
+      'keep-all',
+    ]);
+    assertIsOneOfOrUndefined(options.breakStrategy, 'options.breakStrategy', [
+      'greedy',
+    ]);
+    assertOrUndefined(options.locale, 'options.locale', ['string']);
     assertIsOneOfOrUndefined(options.blendMode, 'options.blendMode', BlendMode);
     assertOrUndefined(options.characterSpacing, 'options.characterSpacing', [
       'number',
@@ -1048,19 +1075,24 @@ export default class PDFPage {
     const fontSize = options.size || this.fontSize;
     const characterSpacing = options.characterSpacing ?? 0;
 
-    const wordBreaks = options.wordBreaks || this.doc.defaultWordBreaks;
     const textWidth = (t: string) =>
       newFont.widthOfTextAtSize(t, fontSize) +
       characterSpacing * newFont.glyphCountOfText(t);
-    const lines =
-      options.maxWidth === undefined
-        ? lineSplit(cleanText(text))
-        : breakTextIntoLines(text, wordBreaks, options.maxWidth, textWidth);
 
-    const encodedLines = new Array(lines.length) as PDFHexString[];
-    for (let idx = 0, len = lines.length; idx < len; idx++) {
-      encodedLines[idx] = newFont.encodeText(lines[idx]);
-    }
+    const wrapped = wrapText(text, textWidth, {
+      maxWidth: options.maxWidth,
+      align: options.align,
+      breakStrategy: options.breakStrategy,
+      wordBreak: options.wordBreak,
+      locale: options.locale,
+    });
+
+    const encodedLines: EncodedTextLine[] = wrapped.map((line) => ({
+      runs: line.runs.map((run) => ({
+        encoded: newFont.encodeText(run.text),
+        x: run.x,
+      })),
+    }));
 
     const graphicsStateKey = this.maybeEmbedGraphicsState({
       opacity: options.opacity,
@@ -1069,7 +1101,7 @@ export default class PDFPage {
 
     const contentStream = this.getContentStream();
     contentStream.push(
-      ...drawLinesOfText(encodedLines, {
+      ...drawAlignedLinesOfText(encodedLines, {
         color: options.color ?? this.fontColor,
         font: newFontKey,
         size: fontSize,

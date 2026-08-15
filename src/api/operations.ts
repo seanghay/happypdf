@@ -97,8 +97,38 @@ export interface DrawLinesOfTextOptions extends DrawTextOptions {
   lineHeight: number | PDFNumber;
 }
 
+/** A horizontal piece of an encoded line, offset from the line's origin. */
+export interface EncodedTextRun {
+  encoded: PDFHexString;
+  /** Offset from the line's origin, in the same units as `options.x`. */
+  x: number;
+}
+
+/**
+ * One laid out line. Left/center/right aligned lines carry a single run;
+ * justified lines carry one run per stretched piece.
+ */
+export interface EncodedTextLine {
+  runs: EncodedTextRun[];
+}
+
 export const drawLinesOfText = (
   lines: PDFHexString[],
+  options: DrawLinesOfTextOptions,
+): PDFOperator[] =>
+  drawAlignedLinesOfText(
+    lines.map((encoded) => ({ runs: [{ encoded, x: 0 }] })),
+    options,
+  );
+
+/**
+ * Draws pre-positioned lines of text. Each line is placed one `lineHeight`
+ * below the previous one, and each run within a line is offset horizontally by
+ * its own `x`, which is what lets a line be centered, right aligned, or
+ * justified.
+ */
+export const drawAlignedLinesOfText = (
+  lines: EncodedTextLine[],
   options: DrawLinesOfTextOptions,
 ): PDFOperator[] => {
   const operators = [
@@ -116,14 +146,23 @@ export const drawLinesOfText = (
     options.renderMode && setTextRenderingMode(options.renderMode),
   ].filter(Boolean) as PDFOperator[];
 
+  const originX = asNumber(options.x);
+  const originY = asNumber(options.y);
+  const lineHeight = asNumber(options.lineHeight);
+
   for (let idx = 0, len = lines.length; idx < len; idx++) {
-    operators.push(
-      ...drawEncodedText(lines[idx], {
-        ...options,
-        x: asNumber(options.x),
-        y: asNumber(options.y) - asNumber(options.lineHeight) * idx,
-      }),
-    );
+    const y = originY - lineHeight * idx;
+    const { runs } = lines[idx];
+
+    for (let r = 0, rLen = runs.length; r < rLen; r++) {
+      operators.push(
+        ...drawEncodedText(runs[r].encoded, {
+          ...options,
+          x: originX + runs[r].x,
+          y,
+        }),
+      );
+    }
   }
 
   operators.push(endText(), popGraphicsState());

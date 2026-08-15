@@ -14,7 +14,7 @@ export default defineConfig([
     dts: true,
     sourcemap: true,
     clean: true,
-    target: 'es2020',
+    target: 'node22',
     treeshake: true,
   },
   {
@@ -29,6 +29,6 @@ export default defineConfig([
     sourcemap: true,
     minify: true,
     clean: false,
-    target: 'es2020',
+    target: 'es2023',
   },
 ]);

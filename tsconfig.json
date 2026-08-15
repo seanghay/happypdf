@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es2015",
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "commonjs",
     "allowJs": false,
     "checkJs": false,

@@ -3,6 +3,7 @@ import PDFFont from './PDFFont';
 import { Rotation } from './rotations';
 import { FillRule, LineCapStyle, TextRenderingMode } from './operators';
 import type { Space, TransformationMatrix } from '../types';
+import type { BreakStrategy, TextAlign, WordBreak } from './text/wrap';
 
 interface SvgOptions {
   matrix?: TransformationMatrix;
@@ -37,7 +38,20 @@ export interface PDFPageDrawTextOptions extends SvgOptions {
   y?: number;
   lineHeight?: number;
   maxWidth?: number;
-  wordBreaks?: string[];
+  /**
+   * How wrapped lines are aligned within `maxWidth`. Defaults to `left`.
+   * `justify` stretches every line but the last of each paragraph.
+   */
+  align?: TextAlign;
+  /** Which algorithm picks the break points. Defaults to `greedy`. */
+  breakStrategy?: BreakStrategy;
+  /**
+   * Whether a word wider than `maxWidth` may be broken between graphemes.
+   * Defaults to `normal` (break it); `keep-all` lets it overflow.
+   */
+  wordBreak?: WordBreak;
+  /** Locale used for word segmentation. Defaults to the runtime's. */
+  locale?: string;
   characterSpacing?: number;
   strokeWidth?: number;
   strokeColor?: Color;

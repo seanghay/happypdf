@@ -278,9 +278,6 @@ export default class PDFDocument {
   /** Whether or not this document is encrypted. */
   readonly isEncrypted: boolean;
 
-  /** The default word breaks used in PDFPage.drawText */
-  defaultWordBreaks: string[] = [' '];
-
   /**
    * When true, [[prepareForSave]] regenerates owned Info/`pdfaid` XMP.
    * Set by [[convertToPDFA]]. Part/level itself lives only in catalog XMP.
@@ -1110,7 +1107,6 @@ export default class PDFDocument {
     if (this.getTitle() !== undefined) {
       pdfCopy.setTitle(this.getTitle()!);
     }
-    pdfCopy.defaultWordBreaks = this.defaultWordBreaks;
 
     return pdfCopy;
   }
