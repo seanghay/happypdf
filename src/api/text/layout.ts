@@ -3,6 +3,7 @@ import { CombedTextLayoutError } from '../errors';
 import { TextAlignment } from './alignment';
 
 import { PDFHexString } from '../../core';
+import { wrapText } from './wrap';
 import {
   cleanText,
   lineSplit,
@@ -39,31 +40,17 @@ const computeFontSize = (
   let fontSize = MIN_FONT_SIZE;
 
   while (fontSize < MAX_FONT_SIZE) {
+    const size = fontSize;
+    const measure = (t: string) => font.widthOfTextAtSize(t, size);
+
+    // Count the lines the text actually occupies at this size, wrapping with
+    // the same segmenter used to draw it so that scripts without spaces are
+    // measured correctly.
     let linesUsed = 0;
-
-    for (
-      let lineIdx = 0, lineLen = lines.length;
-      lineIdx < lineLen;
-      lineIdx++
-    ) {
-      linesUsed += 1;
-
-      const line = lines[lineIdx];
-      const words = line.split(' ');
-
-      // Layout the words using the current `fontSize`, line wrapping
-      // whenever we reach the end of the current line.
-      let spaceInLineRemaining = bounds.width;
-      for (let idx = 0, len = words.length; idx < len; idx++) {
-        const isLastWord = idx === len - 1;
-        const word = isLastWord ? words[idx] : words[idx] + ' ';
-        const widthOfWord = font.widthOfTextAtSize(word, fontSize);
-        spaceInLineRemaining -= widthOfWord;
-        if (spaceInLineRemaining <= 0) {
-          linesUsed += 1;
-          spaceInLineRemaining = bounds.width - widthOfWord;
-        }
-      }
+    for (let idx = 0, len = lines.length; idx < len; idx++) {
+      linesUsed += wrapText(lines[idx], measure, {
+        maxWidth: bounds.width,
+      }).length;
     }
 
     // Return if we exceeded the allowed width
@@ -124,41 +111,6 @@ export interface MultilineTextLayout {
   lineHeight: number;
 }
 
-const lastIndexOfWhitespace = (line: string) => {
-  for (let idx = line.length; idx > 0; idx--) {
-    if (/\s/.test(line[idx])) return idx;
-  }
-  return undefined;
-};
-
-const splitOutLines = (
-  input: string,
-  maxWidth: number,
-  font: PDFFont,
-  fontSize: number,
-) => {
-  let lastWhitespaceIdx = input.length;
-  while (lastWhitespaceIdx > 0) {
-    const line = input.substring(0, lastWhitespaceIdx);
-    const encoded = font.encodeText(line);
-    const width = font.widthOfTextAtSize(line, fontSize);
-    if (width < maxWidth) {
-      const remainder = input.substring(lastWhitespaceIdx) || undefined;
-      return { line, encoded, width, remainder };
-    }
-    lastWhitespaceIdx = lastIndexOfWhitespace(line) ?? 0;
-  }
-
-  // We were unable to split the input enough to get a chunk that would fit
-  // within the specified `maxWidth` so we'll just return everything
-  return {
-    line: input,
-    encoded: font.encodeText(input),
-    width: font.widthOfTextAtSize(input, fontSize),
-    remainder: undefined,
-  };
-};
-
 export const layoutMultilineText = (
   text: string,
   { alignment, fontSize, font, bounds }: LayoutTextOptions,
@@ -168,8 +120,12 @@ export const layoutMultilineText = (
   if (fontSize === undefined || fontSize === 0) {
     fontSize = computeFontSize(lines, font, bounds, true);
   }
-  const height = font.heightAtSize(fontSize);
+  const size = fontSize;
+  const height = font.heightAtSize(size);
   const lineHeight = height + height * 0.2;
+
+  const measure = (t: string) => font.widthOfTextAtSize(t, size);
+  const wrapped = wrapText(text, measure, { maxWidth: bounds.width });
 
   const textLines: TextPosition[] = [];
 
@@ -179,37 +135,34 @@ export const layoutMultilineText = (
   let maxY = bounds.y + bounds.height;
 
   let y = bounds.y + bounds.height;
-  for (let idx = 0, len = lines.length; idx < len; idx++) {
-    let prevRemainder: string | undefined = lines[idx];
-    while (prevRemainder !== undefined) {
-      const { line, encoded, width, remainder } = splitOutLines(
-        prevRemainder,
-        bounds.width,
-        font,
-        fontSize,
-      );
+  for (let idx = 0, len = wrapped.length; idx < len; idx++) {
+    const { text: line, width } = wrapped[idx];
 
-      // prettier-ignore
-      const x = (
-          alignment === TextAlignment.Left   ? bounds.x
-        : alignment === TextAlignment.Center ? bounds.x + (bounds.width / 2) - (width / 2)
-        : alignment === TextAlignment.Right  ? bounds.x + bounds.width - width
-        : bounds.x
-      );
+    // A field's alignment comes from its /Q quadding entry, which has no
+    // justified value, so every line is a single run.
+    // prettier-ignore
+    const x = (
+        alignment === TextAlignment.Left   ? bounds.x
+      : alignment === TextAlignment.Center ? bounds.x + (bounds.width / 2) - (width / 2)
+      : alignment === TextAlignment.Right  ? bounds.x + bounds.width - width
+      : bounds.x
+    );
 
-      y -= lineHeight;
+    y -= lineHeight;
 
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x + width > maxX) maxX = x + width;
-      if (y + height > maxY) maxY = y + height;
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x + width > maxX) maxX = x + width;
+    if (y + height > maxY) maxY = y + height;
 
-      textLines.push({ text: line, encoded, width, height, x, y });
-
-      // Only trim lines that we had to split ourselves. So we won't trim lines
-      // that the user provided themselves with whitespace.
-      prevRemainder = remainder?.trim();
-    }
+    textLines.push({
+      text: line,
+      encoded: font.encodeText(line),
+      width,
+      height,
+      x,
+      y,
+    });
   }
 
   return {

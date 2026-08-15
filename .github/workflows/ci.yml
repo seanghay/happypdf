@@ -33,6 +33,10 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
 
+      # Visual regression tests rasterise fixture pages with pdftoppm.
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends poppler-utils
+
       - name: Install
         run: npm ci
 
@@ -53,3 +57,12 @@ jobs:
 
       - name: Smoke test build output
         run: node scripts/smoke.mjs
+
+      # The renders that failed comparison, so the diff can be reviewed.
+      - name: Upload visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs-node${{ matrix.node }}
+          path: tests/visual/references/*.actual.png
+          if-no-files-found: ignore

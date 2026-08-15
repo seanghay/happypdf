@@ -98,6 +98,7 @@
     "test": "vitest run",
     "testw": "vitest",
     "testc": "vitest run --coverage && open coverage/index.html",
+    "test:visual:update": "VISUAL_UPDATE=1 vitest run tests/visual/visual.spec.ts",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt .",

@@ -14,3 +14,6 @@ out.pdf
 
 .vscode/settings.json
 pdf_specification.pdf
+
+# Visual regression failures
+tests/visual/references/*.actual.png
