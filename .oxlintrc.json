@@ -9,10 +9,8 @@
     "build",
     "coverage",
     "node_modules",
-    "apps/rn",
     "src/core/harfbuzz/hb.wasm.base64.ts",
-    "src/core/harfbuzz/hb-subset.wasm.base64.ts",
-    "apps"
+    "src/core/harfbuzz/hb-subset.wasm.base64.ts"
   ],
   "rules": {
     "typescript/no-explicit-any": "off",

@@ -1,4 +1,3 @@
-// tslint:disable: max-classes-per-file
 import PDFObject from './objects/PDFObject';
 import { arrayAsString } from '../utils';
 

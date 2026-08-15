@@ -71,13 +71,16 @@ export const sliceFontBytes = (fontData: Uint8Array): ArrayBuffer =>
     fontData.byteOffset + fontData.byteLength,
   ) as ArrayBuffer;
 
+const interopDefault = (mod: any) => mod?.default ?? mod;
+
 export const loadHarfBuzz = async (): Promise<HarfBuzz> => {
   if (!harfBuzzPromise) {
     harfBuzzPromise = (async () => {
-      // tslint:disable-next-line:no-var-requires
-      const createHarfBuzz = require('harfbuzzjs/hb.js');
-      // tslint:disable-next-line:no-var-requires
-      const bindHarfBuzz = require('harfbuzzjs/hbjs.js');
+      // `harfbuzzjs` ships CommonJS glue for the wasm module. Dynamic import
+      // keeps this working from both ESM and CJS output, and lets bundlers
+      // inline it for the standalone browser build.
+      const createHarfBuzz = interopDefault(await import('harfbuzzjs/hb.js'));
+      const bindHarfBuzz = interopDefault(await import('harfbuzzjs/hbjs.js'));
 
       const harfBuzzModule = await createHarfBuzz({
         wasmBinary: loadWasmBinary(),

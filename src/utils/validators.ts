@@ -1,5 +1,3 @@
-/* tslint:disable:ban-types */
-
 import { values as objectValues } from './objects';
 
 export const backtick = (val: any) => `\`${val}\``;

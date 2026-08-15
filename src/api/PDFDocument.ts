@@ -2292,7 +2292,6 @@ export default class PDFDocument {
   }
 }
 
-/* tslint:disable-next-line only-arrow-functions */
 function assertIsLiteralOrHexString(
   pdfObject: PDFObject,
 ): asserts pdfObject is PDFHexString | PDFString {

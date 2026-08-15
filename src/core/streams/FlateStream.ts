@@ -14,7 +14,6 @@
  * under the Apache 2.0 open source license.
  */
 
-/* tslint:disable  no-conditional-assignment */
 import DecodeStream from '../../core/streams/DecodeStream';
 import { StreamType } from '../../core/streams/Stream';
 

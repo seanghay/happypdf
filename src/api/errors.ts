@@ -1,5 +1,3 @@
-// tslint:disable: max-classes-per-file
-
 // TODO: Include link to documentation with example
 export class EncryptedPDFError extends Error {
   constructor() {

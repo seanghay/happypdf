@@ -41,7 +41,6 @@ describe('PDFImage', () => {
       const ref = pdfDoc.context.nextRef();
       const pdfImage = PDFImage.of(ref, pdfDoc, embedder);
 
-      // tslint:disable-next-line
       const task = () => pdfImage['embedTask'];
 
       expect(task()).toBeUndefined();

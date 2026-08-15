@@ -1,5 +1,3 @@
-// tslint:disable radix
-
 /**
  * Converts a number to its string representation in decimal. This function
  * differs from simply converting a number to a string with `.toString()`

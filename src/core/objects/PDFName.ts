@@ -37,7 +37,6 @@ class PDFName extends PDFObject {
     return instance;
   };
 
-  /* tslint:disable member-ordering */
   static readonly Length = PDFName.of('Length');
   static readonly FlateDecode = PDFName.of('FlateDecode');
   static readonly Resources = PDFName.of('Resources');
@@ -63,7 +62,6 @@ class PDFName extends PDFObject {
   static readonly Producer = PDFName.of('Producer');
   static readonly CreationDate = PDFName.of('CreationDate');
   static readonly ModDate = PDFName.of('ModDate');
-  /* tslint:enable member-ordering */
 
   private readonly encodedName: string;
 

@@ -77,7 +77,7 @@ enum PDFOperatorNames {
   SetWordSpacing = 'Tw',
   ShowText = 'Tj',
   ShowTextAdjusted = 'TJ',
-  ShowTextLine = "'", // tslint:disable-line quotemark
+  ShowTextLine = "'",
   ShowTextLineAndSpace = '"',
 
   // Type3 Font Operators

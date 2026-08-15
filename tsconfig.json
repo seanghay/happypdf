@@ -38,16 +38,5 @@
     "jsx": "react"
   },
   "include": ["src/**/*", "tests/**/*"],
-  "exclude": [
-    ".circleci",
-    ".github",
-    ".vscode",
-    "apps",
-    "assets",
-    "cjs",
-    "docs",
-    "node_modules",
-    "scratchpad",
-    "tests"
-  ]
+  "exclude": ["assets", "node_modules", "tests"]
 }

@@ -812,12 +812,10 @@ const parseSvgNode = (
   clipSpaces: Space[],
 ): SVGElement[] => {
   // if the width/height aren't set, the svg will have the same dimension as the current drawing space
-  /* tslint:disable:no-unused-expression */
   node.attributes.width ??
     node.setAttribute('width', inherited.viewBox.width + '');
   node.attributes.height ??
     node.setAttribute('height', inherited.viewBox.height + '');
-  /* tslint:enable:no-unused-expression */
   const attributes = parseAttributes(node, inherited, matrix);
   const result: SVGElement[] = [];
   const viewBox = node.attributes.viewBox
@@ -1020,7 +1018,7 @@ export const drawSvg = (
     }
     svgNode.setAttribute(
       'style',
-      Object.entries(style) // tslint:disable-line
+      Object.entries(style)
         .map(([key, val]) => `${key}:${val};`)
         .join(''),
     );
