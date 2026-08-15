@@ -296,6 +296,20 @@ watch(
   font: inherit;
 }
 
+/* Shiki's dual-theme output only carries the colours as custom properties;
+   VitePress applies them for its own code blocks, not for ours. */
+.pdf-demo__highlight :deep(.shiki),
+.pdf-demo__highlight :deep(.shiki span) {
+  color: var(--shiki-light);
+  background-color: transparent;
+}
+
+html.dark .pdf-demo__highlight :deep(.shiki),
+html.dark .pdf-demo__highlight :deep(.shiki span) {
+  color: var(--shiki-dark);
+  background-color: transparent;
+}
+
 .pdf-demo textarea {
   position: relative;
   display: block;
