@@ -18,16 +18,13 @@ if (!fs.existsSync(bundle)) {
   process.exit(1);
 }
 
-/** Demo fonts, named as the demos key them. */
-const fonts = {
-  'NotoSansKhmer-Regular.ttf':
-    'assets/fonts/noto_sans_khmer/NotoSansKhmer-Regular.ttf',
-  'GoogleSans.ttf': 'assets/fonts/google_sans/GoogleSans.ttf',
-  'NotoSansArabic-Regular.ttf':
-    'assets/fonts/noto_sans_arabic/NotoSansArabic-Regular.ttf',
-  'NotoSansThai-Regular.ttf':
-    'assets/fonts/noto_sans_thai/NotoSansThai-Regular.ttf',
-};
+/**
+ * Demo fonts, keyed as the demos reference them. Shared with the demo tests so
+ * the two cannot drift.
+ */
+const fonts = JSON.parse(
+  fs.readFileSync(path.join(root, 'docs/demo-fonts.json'), 'utf8'),
+);
 
 const mb = (file) => (fs.statSync(file).size / 1024 / 1024).toFixed(1);
 
@@ -39,10 +36,11 @@ fs.mkdirSync(fontsDir, { recursive: true });
 
 for (const [name, source] of Object.entries(fonts)) {
   const from = path.join(root, source);
+  const target = `${name}.ttf`;
   if (!fs.existsSync(from)) {
     console.error(`Missing demo font: ${source}`);
     process.exit(1);
   }
-  fs.copyFileSync(from, path.join(fontsDir, name));
-  console.log(`fonts/${name} (${mb(from)}MB)`);
+  fs.copyFileSync(from, path.join(fontsDir, target));
+  console.log(`fonts/${target} (${mb(from)}MB)`);
 }

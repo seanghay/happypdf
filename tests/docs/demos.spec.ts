@@ -11,15 +11,10 @@ import * as happypdf from '../../src/index';
  * library that invalidates a documented example fails the build instead.
  */
 
-const FONT_FILES: Record<string, string> = {
-  'NotoSansKhmer-Regular':
-    'assets/fonts/noto_sans_khmer/NotoSansKhmer-Regular.ttf',
-  GoogleSans: 'assets/fonts/google_sans/GoogleSans.ttf',
-  'NotoSansArabic-Regular':
-    'assets/fonts/noto_sans_arabic/NotoSansArabic-Regular.ttf',
-  'NotoSansThai-Regular':
-    'assets/fonts/noto_sans_thai/NotoSansThai-Regular.ttf',
-};
+/** The manifest the docs build copies into `docs/public/fonts`. */
+const FONT_FILES: Record<string, string> = JSON.parse(
+  fs.readFileSync('docs/demo-fonts.json', 'utf8'),
+);
 
 const loadFonts = (names: string[] = []) => {
   const fonts: Record<string, Uint8Array> = {};
@@ -52,14 +47,12 @@ describe('documentation demos', () => {
     expect(Buffer.from(bytes.subarray(0, 5)).toString()).toBe('%PDF-');
   });
 
-  it('only references fonts that the docs actually ship', () => {
-    const shipped = fs.readdirSync('docs/public/fonts');
+  it('only references fonts the docs build ships', () => {
     for (const [id, demo] of Object.entries(demos)) {
       for (const font of demo.fonts ?? []) {
-        expect(
-          shipped,
-          `${id} needs ${font}.ttf in docs/public/fonts`,
-        ).toContain(`${font}.ttf`);
+        const source = FONT_FILES[font];
+        expect(source, `${id} references an unlisted font: ${font}`).toBeDefined();
+        expect(fs.existsSync(source), `missing font file: ${source}`).toBe(true);
       }
     }
   });
