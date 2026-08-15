@@ -51,8 +51,13 @@ describe('documentation demos', () => {
     for (const [id, demo] of Object.entries(demos)) {
       for (const font of demo.fonts ?? []) {
         const source = FONT_FILES[font];
-        expect(source, `${id} references an unlisted font: ${font}`).toBeDefined();
-        expect(fs.existsSync(source), `missing font file: ${source}`).toBe(true);
+        expect(
+          source,
+          `${id} references an unlisted font: ${font}`,
+        ).toBeDefined();
+        expect(fs.existsSync(source), `missing font file: ${source}`).toBe(
+          true,
+        );
       }
     }
   });
