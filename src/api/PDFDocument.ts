@@ -1207,7 +1207,7 @@ export default class PDFDocument {
 
   /**
    * Get all JavaScript from XFA form template.
-   * XFA forms can contain JavaScript in <script> elements within the template XML.
+   * XFA forms can contain JavaScript in `<script>` elements within the template XML.
    * For example:
    * ```js
    * const xfaScripts = pdfDoc.getXFAJavaScripts()

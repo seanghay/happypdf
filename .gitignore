@@ -17,3 +17,8 @@ pdf_specification.pdf
 
 # Visual regression failures
 tests/visual/references/*.actual.png
+docs/api/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+docs/public/happypdf.min.js
+docs/public/fonts/

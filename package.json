@@ -104,7 +104,12 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm test"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test",
+    "docs:api": "node scripts/docs-api.mjs",
+    "docs:dev": "npm run docs:api && vitepress dev docs",
+    "docs:build": "npm run build && npm run docs:assets && npm run docs:api && vitepress build docs",
+    "docs:assets": "node scripts/docs-assets.mjs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@pdf-lib/standard-fonts": "^1.0.0",
@@ -125,7 +130,10 @@
     "oxlint": "^1.78.0",
     "rimraf": "^5.0.5",
     "tsdown": "^0.22.14",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^5.9.3",
+    "vitepress": "^1.6.4",
     "vitest": "^4.1.10"
   },
   "peerDependencies": {

@@ -1,0 +1,64 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'src/**'
+      - 'scripts/docs-*.mjs'
+      - 'typedoc.json'
+      - '.github/workflows/docs.yml'
+      - 'package.json'
+  workflow_dispatch:
+
+# Only one deployment at a time; let a newer commit supersede a running build.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # lastUpdated timestamps come from git history
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - uses: actions/configure-pages@v5
+
+      # Builds the library first: the live demos are served the browser bundle
+      # this repo produces, not a CDN copy of some other version.
+      - name: Build docs
+        run: npm run docs:build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
