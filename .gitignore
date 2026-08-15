@@ -22,3 +22,4 @@ docs/.vitepress/dist/
 docs/.vitepress/cache/
 docs/public/happypdf.min.js
 docs/public/fonts/
+docs/public/webfonts/GoogleSans-*-subset.ttf

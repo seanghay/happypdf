@@ -22,35 +22,65 @@ const status = ref('Loading happypdf…');
 
 const BASE = import.meta.env.BASE_URL;
 
-let lib: any = null;
-let pdfjs: any = null;
+// These are cached as promises, not resolved values: several demos mount at
+// once, and caching after the await would let each start its own instance.
+let libPromise: Promise<any> | null = null;
+let pdfjsPromise: Promise<any> | null = null;
+let highlighterPromise: Promise<any> | null = null;
 const fontCache = new Map<string, Uint8Array>();
+
+const highlighted = ref('');
+
+/**
+ * The editor is a transparent textarea sitting on top of a highlighted copy of
+ * the same text, which is the simplest way to get syntax colouring without
+ * pulling in a full code editor. Both layers must share identical metrics.
+ */
+const loadHighlighter = () => {
+  highlighterPromise ??= (async () => {
+    const { createHighlighter } = await import('shiki');
+    return createHighlighter({
+      themes: ['github-light', 'github-dark'],
+      langs: ['javascript'],
+    });
+  })();
+  return highlighterPromise;
+};
+
+const paint = async () => {
+  const shiki = await loadHighlighter();
+  // A trailing newline keeps the last line's height stable while typing.
+  highlighted.value = shiki.codeToHtml(`${source.value}\n`, {
+    lang: 'javascript',
+    themes: { light: 'github-light', dark: 'github-dark' },
+    defaultColor: false,
+  });
+};
 
 /** The library is loaded as the published browser bundle, so the demos exercise
  * exactly what a reader would get from a script tag. */
-const loadLib = async () => {
-  if (lib) return lib;
-  await new Promise<void>((resolve, reject) => {
+const loadLib = () => {
+  libPromise ??= new Promise<any>((resolve, reject) => {
     const script = document.createElement('script');
     script.src = `${BASE}happypdf.min.js`;
-    script.onload = () => resolve();
+    script.onload = () => resolve((window as any).happypdf);
     script.onerror = () =>
       reject(new Error('Failed to load the happypdf bundle'));
     document.head.appendChild(script);
   });
-  lib = (window as any).happypdf;
-  return lib;
+  return libPromise;
 };
 
 // Chrome refuses to display blob: PDFs inside an iframe, so the preview is
 // rasterised with pdf.js instead of handed to the built-in viewer.
-const loadPdfjs = async () => {
-  if (pdfjs) return pdfjs;
-  const mod = await import('pdfjs-dist');
-  const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
-  mod.GlobalWorkerOptions.workerSrc = worker.default;
-  pdfjs = mod;
-  return pdfjs;
+const loadPdfjs = () => {
+  pdfjsPromise ??= (async () => {
+    const mod = await import('pdfjs-dist');
+    const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+    mod.GlobalWorkerOptions.workerSrc = worker.default;
+    return mod;
+  })();
+  return pdfjsPromise;
 };
 
 const loadFont = async (name: string) => {
@@ -142,7 +172,14 @@ const mountCanvases = async () => {
 
 watch(canvases, mountCanvases);
 
-onMounted(run);
+// Highlighting is decorative and client-only: running it during SSR would spin
+// up a Shiki instance per render for markup the browser immediately replaces.
+watch(source, paint);
+
+onMounted(() => {
+  paint();
+  run();
+});
 watch(
   () => props.id,
   () => {
@@ -155,13 +192,22 @@ watch(
 <template>
   <div class="pdf-demo">
     <div class="pdf-demo__editor">
-      <textarea
-        v-model="source"
-        spellcheck="false"
-        :rows="Math.min(source.split('\n').length + 1, 26)"
-        @keydown.ctrl.enter.prevent="run"
-        @keydown.meta.enter.prevent="run"
-      />
+      <div class="pdf-demo__code">
+        <div
+          class="pdf-demo__highlight"
+          aria-hidden="true"
+          v-html="highlighted"
+        />
+        <textarea
+          v-model="source"
+          spellcheck="false"
+          autocapitalize="off"
+          autocorrect="off"
+          :rows="Math.min(source.split('\n').length + 1, 26)"
+          @keydown.ctrl.enter.prevent="run"
+          @keydown.meta.enter.prevent="run"
+        />
+      </div>
       <div class="pdf-demo__bar">
         <button :disabled="running" @click="run">
           {{ running ? 'Running…' : 'Run' }}
@@ -205,22 +251,64 @@ watch(
   min-width: 0;
 }
 
-.pdf-demo textarea {
-  width: 100%;
-  padding: 12px;
+.pdf-demo__code {
+  position: relative;
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px 8px 0 0;
   background: var(--vp-code-block-bg);
-  color: var(--vp-c-text-1);
+  overflow: hidden;
+}
+
+.pdf-demo__code:focus-within {
+  border-color: var(--vp-c-brand-1);
+}
+
+/* Both layers must lay text out identically for the caret to line up. */
+.pdf-demo__highlight,
+.pdf-demo textarea {
+  margin: 0;
+  padding: 12px;
   font-family: var(--vp-font-family-mono);
   font-size: 12.5px;
   line-height: 1.6;
-  resize: vertical;
   tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.pdf-demo__highlight {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  pointer-events: none;
+}
+
+.pdf-demo__highlight :deep(pre) {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  font: inherit;
+  white-space: inherit;
+  overflow-wrap: inherit;
+}
+
+.pdf-demo__highlight :deep(code) {
+  font: inherit;
+}
+
+.pdf-demo textarea {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--vp-c-text-1);
+  resize: vertical;
 }
 
 .pdf-demo textarea:focus {
-  outline: 1px solid var(--vp-c-brand-1);
+  outline: none;
 }
 
 .pdf-demo__bar {

@@ -1,7 +1,54 @@
 /**
+ * Typography.
+ *
+ * Google Sans is instanced and subset from the variable font in this repo using
+ * HappyPDF's own HarfBuzz subsetter — 4.6MB down to ~95KB a weight. Geist Mono
+ * is the variable Latin cut from Google Fonts, self-hosted so the site makes no
+ * third-party requests.
+ */
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/happypdf/webfonts/GoogleSans-Regular-subset.ttf')
+    format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/happypdf/webfonts/GoogleSans-Medium-subset.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url('/happypdf/webfonts/GoogleSans-Bold-subset.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/happypdf/webfonts/GeistMono.woff2') format('woff2');
+}
+
+/**
  * Brand palette, keyed to the red of the logo mark.
  */
 :root {
+  --vp-font-family-base:
+    'Google Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', roboto,
+    sans-serif;
+  --vp-font-family-mono:
+    'Geist Mono', ui-monospace, sfmono-regular, 'SF Mono', menlo, monospace;
+
   --vp-c-brand-1: #d1352f;
   --vp-c-brand-2: #e5484d;
   --vp-c-brand-3: #e5484d;
