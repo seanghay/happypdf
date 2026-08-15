@@ -95,4 +95,34 @@ describe('CustomFontSubsetEmbedder', () => {
       3,
     );
   });
+
+  // Regression: the embedder used to keep the caller's bytes while measuring
+  // from the instanced font, so a variable font rendered at its axis defaults
+  // no matter which `variations` were asked for.
+  it('embeds the instanced bytes, not the original font', async () => {
+    const regular = await CustomFontSubsetEmbedder.for(
+      googleSansVariableFont,
+      undefined,
+      undefined,
+      { wght: 400 },
+    );
+    const bold = await CustomFontSubsetEmbedder.for(
+      googleSansVariableFont,
+      undefined,
+      undefined,
+      { wght: 700 },
+    );
+
+    const original = new Uint8Array(googleSansVariableFont);
+
+    expect(
+      Buffer.compare(Buffer.from(regular.fontData), Buffer.from(original)),
+    ).not.toBe(0);
+    expect(
+      Buffer.compare(Buffer.from(bold.fontData), Buffer.from(original)),
+    ).not.toBe(0);
+    expect(
+      Buffer.compare(Buffer.from(regular.fontData), Buffer.from(bold.fontData)),
+    ).not.toBe(0);
+  });
 });

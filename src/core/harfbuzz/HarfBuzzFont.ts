@@ -70,7 +70,12 @@ class HarfBuzzEmbeddedFont implements Font {
   private readonly hbBlob: any;
   private readonly hbFace: HarfBuzzFace;
   private readonly hbFont: HarfBuzzFont;
-  private readonly fontData: Uint8Array;
+  /**
+   * The font bytes after variable-font instancing. These are what must be
+   * embedded: the original bytes would render at the axis defaults, ignoring
+   * any requested `variations`.
+   */
+  readonly fontData: Uint8Array;
   private readonly cmap: CmapLookup;
 
   private constructor(

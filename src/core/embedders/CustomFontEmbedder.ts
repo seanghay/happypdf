@@ -40,9 +40,16 @@ class CustomFontEmbedder {
       fontFeaturesOrVariations,
       fontVariations,
     );
-    return new CustomFontEmbedder(
-      await HarfBuzzEmbeddedFont.create(fontData, resolvedFontVariations),
+    const font = await HarfBuzzEmbeddedFont.create(
       fontData,
+      resolvedFontVariations,
+    );
+
+    // Embed the instanced bytes, not the caller's: with a variable font the
+    // originals would render at the axis defaults regardless of `variations`.
+    return new CustomFontEmbedder(
+      font,
+      font.fontData,
       customName,
       resolvedFontFeatures,
     );
