@@ -11,7 +11,11 @@ Each snippet receives two things:
 
 and must **return a `PDFDocument`**.
 
-## Khmer shaping
+[[toc]]
+
+## Complex scripts
+
+### Khmer shaping
 
 The reason this fork exists. Khmer stacks consonants into orthographic clusters
 and reorders vowels around them — shaping the font engine has to perform. Try
@@ -19,35 +23,87 @@ adding your own Khmer text.
 
 <PdfDemo id="khmer-shaping" />
 
-## Wrapping and alignment
+### Arabic
+
+Arabic letters take different forms depending on their neighbours, and the
+script runs right to left. Both fall out of shaping.
+
+<PdfDemo id="arabic-shaping" />
+
+### Thai wrapping
+
+Thai does not put spaces between words either. `Intl.Segmenter` finds the break
+opportunities, so wrapping and justification land in sensible places.
+
+<PdfDemo id="thai-wrapping" />
+
+### Justifying a script without spaces
+
+The same idea in Khmer: the top block is ragged right, the bottom is justified.
+Gaps open at word boundaries rather than between letters.
+
+<PdfDemo id="khmer-justify" />
+
+## Text layout
+
+### Wrapping and alignment
 
 `maxWidth` wraps the text; `align` decides how the lines sit within it. Change
 `align` in the loop, or narrow `maxWidth`, and re-run.
 
-<PdfDemo id="alignment" height="520px" />
+<PdfDemo id="alignment" height="560px" />
 
-## Justifying a script without spaces
+### Measuring before drawing
 
-Khmer does not separate words with spaces. Break points come from
-`Intl.Segmenter`, so wrapping and justification still land on word boundaries
-instead of splitting mid-word.
+`wrapText` returns the line boxes without drawing anything, so you can size a
+container to its contents — here a box drawn to exactly fit the text.
 
-<PdfDemo id="khmer-justify" />
+<PdfDemo id="measuring" />
 
-## Variable fonts
+### Multi-page documents
+
+<PdfDemo id="multi-page" height="560px" />
+
+## Fonts
+
+### Variable fonts
 
 `variations` instances a variable font on its axes, and the instanced outlines
 are what gets embedded — so the weight you ask for is the weight that renders.
 
 <PdfDemo id="variable-font" />
 
-## Drawing and shapes
+### OpenType features
 
-Everything inherited from pdf-lib works unchanged.
+Feature tags are forwarded to HarfBuzz. Compare the default rendering with
+ligatures and kerning switched off.
+
+<PdfDemo id="features-kerning" />
+
+## Documents
+
+### Editing an existing PDF
+
+Load a document, then stamp it. This is the flow you would use on a file
+fetched from a server.
+
+<PdfDemo id="edit-existing" />
+
+### Merging documents
+
+<PdfDemo id="merge-pages" height="520px" />
+
+### Drawing and shapes
 
 <PdfDemo id="drawing" />
 
-## Forms
+### Vector paths
+
+`drawSvgPath` renders vector paths directly, with no rasterisation.
+
+<PdfDemo id="images-svg" />
+
+### Forms
 
 Fields can be created, filled and given appearances. Multiline fields wrap with
 the same segmenter `drawText` uses.

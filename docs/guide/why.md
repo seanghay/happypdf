@@ -1,6 +1,6 @@
-# Why happypdf
+# Why HappyPDF
 
-happypdf is a fork of [pdf-lib](https://github.com/Hopding/pdf-lib) (by way of
+HappyPDF is a fork of [pdf-lib](https://github.com/Hopding/pdf-lib) (by way of
 [@cantoo/pdf-lib](https://github.com/cantoo-scribe/pdf-lib)) that replaces
 fontkit with [HarfBuzz](https://harfbuzz.github.io/).
 
@@ -21,7 +21,7 @@ the code points in logical order produces text that is, at best, unreadable.
 the bundle, so there is no extra download and nothing to install.
 
 **Every glyph is positioned individually.** Rather than emitting one `Tj`
-operator per line and trusting the viewer, happypdf writes each shaped glyph at
+operator per line and trusting the viewer, HappyPDF writes each shaped glyph at
 the position HarfBuzz computed. Reordering, ligatures and mark placement survive
 into the file.
 
@@ -43,7 +43,7 @@ over.
 
 ## Differences from pdf-lib
 
-|                        | pdf-lib                    | happypdf                          |
+|                        | pdf-lib                    | HappyPDF                          |
 | ---------------------- | -------------------------- | --------------------------------- |
 | Shaping engine         | fontkit                    | HarfBuzz (bundled)                |
 | Setup for custom fonts | `registerFontkit(fontkit)` | none                              |

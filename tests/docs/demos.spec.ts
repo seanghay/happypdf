@@ -15,6 +15,10 @@ const FONT_FILES: Record<string, string> = {
   'NotoSansKhmer-Regular':
     'assets/fonts/noto_sans_khmer/NotoSansKhmer-Regular.ttf',
   GoogleSans: 'assets/fonts/google_sans/GoogleSans.ttf',
+  'NotoSansArabic-Regular':
+    'assets/fonts/noto_sans_arabic/NotoSansArabic-Regular.ttf',
+  'NotoSansThai-Regular':
+    'assets/fonts/noto_sans_thai/NotoSansThai-Regular.ttf',
 };
 
 const loadFonts = (names: string[] = []) => {

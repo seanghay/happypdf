@@ -1,0 +1,35 @@
+/**
+ * Brand palette, keyed to the red of the logo mark.
+ */
+:root {
+  --vp-c-brand-1: #d1352f;
+  --vp-c-brand-2: #e5484d;
+  --vp-c-brand-3: #e5484d;
+  --vp-c-brand-soft: rgb(229 72 77 / 14%);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #e5484d 30%, #f2a33c);
+
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    rgb(229 72 77 / 45%),
+    rgb(242 163 60 / 45%)
+  );
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+.dark {
+  --vp-c-brand-1: #ff6b66;
+  --vp-c-brand-2: #e5484d;
+  --vp-c-brand-3: #c93b39;
+  --vp-c-brand-soft: rgb(229 72 77 / 20%);
+}
+
+/* The feature cards read better with a hint of the brand colour. */
+.VPFeature {
+  transition: border-color 0.2s ease;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+}

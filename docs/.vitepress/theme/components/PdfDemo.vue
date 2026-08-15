@@ -13,27 +13,44 @@ const demo = demos[props.id];
 if (!demo) throw new Error(`Unknown demo: ${props.id}`);
 
 const source = ref(demo.code.trim());
-const url = shallowRef<string>('');
-const error = ref<string>('');
+const canvases = ref<HTMLCanvasElement[]>([]);
+const pageCount = ref(0);
+const downloadUrl = shallowRef('');
+const error = ref('');
 const running = ref(false);
-const ready = ref(false);
-
-let lib: any = null;
-const fontCache = new Map<string, Uint8Array>();
+const status = ref('Loading happypdf…');
 
 const BASE = import.meta.env.BASE_URL;
 
+let lib: any = null;
+let pdfjs: any = null;
+const fontCache = new Map<string, Uint8Array>();
+
+/** The library is loaded as the published browser bundle, so the demos exercise
+ * exactly what a reader would get from a script tag. */
 const loadLib = async () => {
   if (lib) return lib;
   await new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
     script.src = `${BASE}happypdf.min.js`;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load happypdf bundle'));
+    script.onerror = () =>
+      reject(new Error('Failed to load the happypdf bundle'));
     document.head.appendChild(script);
   });
   lib = (window as any).happypdf;
   return lib;
+};
+
+// Chrome refuses to display blob: PDFs inside an iframe, so the preview is
+// rasterised with pdf.js instead of handed to the built-in viewer.
+const loadPdfjs = async () => {
+  if (pdfjs) return pdfjs;
+  const mod = await import('pdfjs-dist');
+  const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+  mod.GlobalWorkerOptions.workerSrc = worker.default;
+  pdfjs = mod;
+  return pdfjs;
 };
 
 const loadFont = async (name: string) => {
@@ -46,9 +63,38 @@ const loadFont = async (name: string) => {
   return bytes;
 };
 
+const render = async (bytes: Uint8Array) => {
+  const lib = await loadPdfjs();
+  const doc = await lib.getDocument({ data: bytes.slice() }).promise;
+
+  pageCount.value = doc.numPages;
+  const rendered: HTMLCanvasElement[] = [];
+
+  for (let n = 1; n <= doc.numPages; n++) {
+    const page = await doc.getPage(n);
+    const scale = Math.min(2, (window.devicePixelRatio || 1) * 1.5);
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.width = '100%';
+
+    await page.render({
+      canvasContext: canvas.getContext('2d')!,
+      viewport,
+    }).promise;
+
+    rendered.push(canvas);
+  }
+
+  canvases.value = rendered;
+};
+
 const run = async () => {
   running.value = true;
   error.value = '';
+  status.value = 'Running…';
 
   try {
     const happypdf = await loadLib();
@@ -56,30 +102,41 @@ const run = async () => {
     const fonts: Record<string, Uint8Array> = {};
     for (const name of demo.fonts ?? []) fonts[name] = await loadFont(name);
 
-    // eslint-disable-next-line no-new-func
     const build = new Function(
       'happypdf',
       'fonts',
       `return (async () => { ${source.value} })()`,
     );
 
-    const doc = await build(happypdf, fonts);
-    if (!doc || typeof doc.save !== 'function') {
+    const pdfDoc = await build(happypdf, fonts);
+    if (!pdfDoc || typeof pdfDoc.save !== 'function') {
       throw new Error('The snippet must return a PDFDocument');
     }
 
-    const bytes = await doc.save();
-    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const bytes = await pdfDoc.save();
 
-    if (url.value) URL.revokeObjectURL(url.value);
-    url.value = URL.createObjectURL(blob);
+    if (downloadUrl.value) URL.revokeObjectURL(downloadUrl.value);
+    downloadUrl.value = URL.createObjectURL(
+      new Blob([bytes], { type: 'application/pdf' }),
+    );
+
+    await render(bytes);
+    status.value = '';
   } catch (e: any) {
+    canvases.value = [];
     error.value = e?.message ?? String(e);
   } finally {
     running.value = false;
-    ready.value = true;
   }
 };
+
+const mountCanvases = (el: HTMLElement | null) => {
+  if (!el) return;
+  el.replaceChildren(...canvases.value);
+};
+
+const output = ref<HTMLElement | null>(null);
+watch(canvases, () => mountCanvases(output.value));
 
 onMounted(run);
 watch(
@@ -97,23 +154,28 @@ watch(
       <textarea
         v-model="source"
         spellcheck="false"
-        :rows="Math.min(source.split('\n').length + 1, 24)"
-        @keydown.ctrl.enter="run"
-        @keydown.meta.enter="run"
+        :rows="Math.min(source.split('\n').length + 1, 26)"
+        @keydown.ctrl.enter.prevent="run"
+        @keydown.meta.enter.prevent="run"
       />
       <div class="pdf-demo__bar">
         <button :disabled="running" @click="run">
           {{ running ? 'Running…' : 'Run' }}
         </button>
         <span class="pdf-demo__hint">⌘/Ctrl + Enter</span>
-        <a v-if="url" :href="url" download="demo.pdf">Download PDF</a>
+        <span v-if="pageCount > 1" class="pdf-demo__hint"
+          >{{ pageCount }} pages</span
+        >
+        <a v-if="downloadUrl" :href="downloadUrl" download="demo.pdf">
+          Download PDF
+        </a>
       </div>
     </div>
 
-    <div class="pdf-demo__output" :style="{ height: height ?? '420px' }">
-      <p v-if="error" class="pdf-demo__error">{{ error }}</p>
-      <p v-else-if="!ready" class="pdf-demo__loading">Loading happypdf…</p>
-      <iframe v-else-if="url" :src="url" title="Rendered PDF" />
+    <div class="pdf-demo__preview" :style="{ maxHeight: height ?? '460px' }">
+      <pre v-if="error" class="pdf-demo__error">{{ error }}</pre>
+      <p v-else-if="status" class="pdf-demo__status">{{ status }}</p>
+      <div v-else ref="output" class="pdf-demo__pages" />
     </div>
   </div>
 </template>
@@ -128,7 +190,8 @@ watch(
 
 @media (min-width: 960px) {
   .pdf-demo {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
   }
 }
 
@@ -171,7 +234,7 @@ watch(
   padding: 4px 14px;
   border-radius: 6px;
   background: var(--vp-c-brand-1);
-  color: var(--vp-c-white);
+  color: #fff;
   font-size: 13px;
   font-weight: 600;
 }
@@ -180,34 +243,43 @@ watch(
   opacity: 0.6;
 }
 
-.pdf-demo__hint,
-.pdf-demo__bar a {
+.pdf-demo__hint {
   font-size: 12px;
-  color: var(--vp-c-text-2);
+  color: var(--vp-c-text-3);
 }
 
 .pdf-demo__bar a {
   margin-left: auto;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--vp-c-brand-1);
 }
 
-.pdf-demo__output {
+.pdf-demo__preview {
+  padding: 10px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
-  overflow: hidden;
   background: var(--vp-c-bg-soft);
+  overflow: auto;
 }
 
-.pdf-demo__output iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
+.pdf-demo__pages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pdf-demo__pages :deep(canvas) {
+  display: block;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 18%);
 }
 
 .pdf-demo__error,
-.pdf-demo__loading {
+.pdf-demo__status {
   margin: 0;
-  padding: 16px;
+  padding: 8px;
   font-family: var(--vp-font-family-mono);
   font-size: 12.5px;
 }
@@ -215,5 +287,9 @@ watch(
 .pdf-demo__error {
   color: var(--vp-c-danger-1);
   white-space: pre-wrap;
+}
+
+.pdf-demo__status {
+  color: var(--vp-c-text-3);
 }
 </style>

@@ -1,4 +1,4 @@
-<h1 align="center">happypdf</h1>
+<h1 align="center">HappyPDF</h1>
 
 <div align="center">
   <strong>Create and modify PDF documents in any JavaScript environment — with real text shaping.</strong>
@@ -24,10 +24,10 @@
 npm install happypdf
 ```
 
-## Why happypdf
+## Why HappyPDF
 
 `pdf-lib` shapes text with fontkit, which handles Latin and simple scripts well but mis-renders
-scripts that need reordering, mark attachment, or contextual substitution. `happypdf` swaps in
+scripts that need reordering, mark attachment, or contextual substitution. HappyPDF swaps in
 HarfBuzz (compiled to WebAssembly and inlined into the bundle — no extra download, no separate
 install) and positions every shaped glyph individually in the content stream.
 

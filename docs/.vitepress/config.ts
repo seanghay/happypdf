@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  title: 'happypdf',
+  title: 'HappyPDF',
   description:
     'Create and modify PDF documents in any JavaScript environment, with HarfBuzz shaping for complex scripts.',
   base: '/happypdf/',
@@ -16,6 +16,8 @@ export default defineConfig({
   ],
 
   themeConfig: {
+    logo: '/logo.svg',
+
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Demos', link: '/demos' },
@@ -32,7 +34,8 @@ export default defineConfig({
           text: 'Introduction',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Why happypdf', link: '/guide/why' },
+            { text: 'Why HappyPDF', link: '/guide/why' },
+            { text: 'Migrating from pdf-lib', link: '/guide/migration' },
           ],
         },
         {
@@ -43,10 +46,19 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Documents',
+          text: 'Content',
           items: [
             { text: 'Creating and Editing', link: '/guide/documents' },
+            { text: 'Images', link: '/guide/images' },
+            { text: 'Graphics', link: '/guide/graphics' },
             { text: 'Forms', link: '/guide/forms' },
+          ],
+        },
+        {
+          text: 'Reference',
+          items: [
+            { text: 'Encryption and Metadata', link: '/guide/security' },
+            { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
         },
       ],

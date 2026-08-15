@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: happypdf
+  name: HappyPDF
   text: PDFs that shape text correctly
   tagline: Create and modify PDF documents in any JavaScript environment — with HarfBuzz shaping, so Khmer, Thai, Lao, Arabic and Indic scripts render the way they should.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /demos
     - theme: alt
       text: GitHub
-      link: https://github.com/seanghay/happypdf
+      link: https://github.com/seanghay/HappyPDF
 
 features:
   - title: Correct complex scripts

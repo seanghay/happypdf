@@ -2,7 +2,7 @@
   "name": "happypdf",
   "version": "0.1.0",
   "private": false,
-  "description": "Create and modify PDF files with JavaScript, with HarfBuzz shaping for complex scripts",
+  "description": "HappyPDF — create and modify PDF files with JavaScript, with HarfBuzz shaping for complex scripts",
   "keywords": [
     "arabic",
     "complex-scripts",
@@ -128,6 +128,7 @@
     "@types/pako": "^2.0.4",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
+    "pdfjs-dist": "^6.2.108",
     "rimraf": "^5.0.5",
     "tsdown": "^0.22.14",
     "typedoc": "^0.28.20",

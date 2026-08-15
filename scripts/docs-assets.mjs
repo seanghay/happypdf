@@ -23,6 +23,10 @@ const fonts = {
   'NotoSansKhmer-Regular.ttf':
     'assets/fonts/noto_sans_khmer/NotoSansKhmer-Regular.ttf',
   'GoogleSans.ttf': 'assets/fonts/google_sans/GoogleSans.ttf',
+  'NotoSansArabic-Regular.ttf':
+    'assets/fonts/noto_sans_arabic/NotoSansArabic-Regular.ttf',
+  'NotoSansThai-Regular.ttf':
+    'assets/fonts/noto_sans_thai/NotoSansThai-Regular.ttf',
 };
 
 const mb = (file) => (fs.statSync(file).size / 1024 / 1024).toFixed(1);

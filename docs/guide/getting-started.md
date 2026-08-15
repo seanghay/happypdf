@@ -6,7 +6,7 @@
 npm install happypdf
 ```
 
-happypdf requires **Node 22 or newer**, and works in modern browsers, Deno and
+HappyPDF requires **Node 22 or newer**, and works in modern browsers, Deno and
 edge runtimes.
 
 ## Your first document
@@ -33,7 +33,7 @@ fs.writeFileSync('hello.pdf', await pdfDoc.save());
 ## Embedding a custom font
 
 Unlike pdf-lib, there is **no font engine to install and register**. Pass the
-font bytes and happypdf shapes them with the bundled HarfBuzz:
+font bytes and HappyPDF shapes them with the bundled HarfBuzz:
 
 ```js
 const fontBytes = fs.readFileSync('NotoSansKhmer-Regular.ttf');
@@ -88,7 +88,7 @@ The bundle inlines the HarfBuzz WebAssembly, so there is nothing else to fetch.
 
 ## Next steps
 
-- [Why happypdf](/guide/why) — what this fork changes
+- [Why HappyPDF](/guide/why) — what this fork changes
 - [Fonts and Shaping](/guide/fonts) — complex scripts, subsetting, variable fonts
 - [Wrapping and Alignment](/guide/text-layout) — `maxWidth`, `align`, justification
 - [Live Demos](/demos) — runnable examples in your browser
