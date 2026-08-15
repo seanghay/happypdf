@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": [
+    "dist",
+    "build",
+    "coverage",
+    "node_modules",
+    "apps/rn",
+    "src/core/harfbuzz/hb.wasm.base64.ts",
+    "src/core/harfbuzz/hb-subset.wasm.base64.ts",
+    "apps"
+  ],
+  "rules": {
+    "typescript/no-explicit-any": "off",
+    "no-unused-vars": [
+      "error",
+      {
+        "caughtErrors": "none",
+        "args": "none"
+      }
+    ],
+    "no-unused-expressions": "off",
+    "typescript/no-duplicate-enum-values": "off"
+  }
+}

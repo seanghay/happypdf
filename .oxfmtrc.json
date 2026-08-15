@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 80,
+  "semi": true,
+  "arrowParens": "always",
+  "ignorePatterns": [
+    "dist",
+    "build",
+    "coverage",
+    "apps",
+    "docs",
+    "assets",
+    ".github",
+    "scratchpad",
+    "src/core/harfbuzz/hb.wasm.base64.ts",
+    "src/core/harfbuzz/hb-subset.wasm.base64.ts"
+  ]
+}

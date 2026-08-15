@@ -1,0 +1,97 @@
+name: Bug Report 🐛
+description: Something not working? Let us know! Just be sure it's something we can reproduce.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to submit a bug report! 😃
+        * Be sure to answer **all** of the questions below.
+        * Provide lots of detail. Too much info is better than not enough.
+        * If we can't reproduce the issue, we can't fix it.
+
+        If you've never created an issue on GitHub before, you might find these links helpful:
+        * [45 GitHub Issues Dos and Don'ts](https://davidwalsh.name/45-github-issues-dos-donts)
+        * [Smart Questions](http://catb.org/~esr/faqs/smart-questions.html)
+
+        You can read [MAINTAINERSHIP.md](https://github.com/Hopding/pdf-lib/blob/master/docs/MAINTAINERSHIP.md) to learn more about how this repo is maintained.
+  - type: textarea
+    attributes:
+      label: What were you trying to do?
+      description: Clearly describe what you were trying to do when you found this bug.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: How did you attempt to do it?
+      description: Clearly describe, in detail, how you attempted to do this. Include both prose and code snippets in your response.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What actually happened?
+      description: Clearly describe what actually happened as a result of what you attempted. Be sure to include all relevant stacktraces, CLI output, and screenshots.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What did you expect to happen?
+      description: Clearly describe what you expected to happen as a result of what you attempted. Include examples of what you expected in your response.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: How can we reproduce the issue?
+      description: |
+        📣 _This is a very important part of your report._
+
+        Provide **complete**, **executable** code that can be used to reproduce the bug (e.g. a git repo, ZIP file, or JSFiddle). You must attach (or provide links to) any PDFs, images, or other files necessary to run your code.
+
+        Your code example should be a [SSCCE](http://www.sscce.org/):
+        - Short (Small) - Don't include code that is irrelevant or unnecessary.
+        - Self Contained - Ensure everything is included, ready to go.
+        - Correct - No additional code or changes are needed to copy, paste, and execute it. 
+        - Example - Demonstrates the problem you are reporting.
+
+        Please also type out a list of specific steps we can take to run your code and reproduce the issue. Depending on what you're reporting, this might be simple as running a JSFiddle or downloading a ZIP file and executing `node index.js`. Some issues will require more instructions. 
+
+        > If you are unable to share certain files (e.g. confidential PDFs), then state this in your response. Be prepared to share the files privately (e.g. via email). If you are unable to do this then we probably can't fix the issue.
+     
+        ⚠️ If your response includes incomplete code or doesn't clearly state how to execute the code you've provided, your report will be closed without comment.
+        
+        💖 Thank you for taking the time to create a well-defined report! This helps reduce the demand placed on maintainers trying to help you. We want to make this a pleasant, efficient process for both you and us!
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version
+      description: What version of `pdf-lib` are you using?
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: What environment are you running pdf-lib in?
+      multiple: true
+      options:
+        - Browser
+        - Node
+        - Deno
+        - React Native
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Checklist
+      options:
+        - label: My report includes a Short, Self Contained, Correct (Compilable) Example.
+          required: true
+        - label: I have attached all PDFs, images, and other files needed to run my SSCCE.
+          required: true
+  - type: textarea
+    attributes:
+      label: Additional Notes
+      description: |
+        Please provide any additional information or observations here.
+    validations:
+      required: false
